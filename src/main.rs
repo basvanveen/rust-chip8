@@ -1,0 +1,14 @@
+use crate::chip8::Chip8;
+
+mod memory;
+mod chip8;
+mod cpu;
+
+fn main() {
+    
+    let mut chip8 = Chip8::new();
+    chip8.load_rom("src/rom/ibmlogo.ch8");
+    chip8.print_memory();
+    // Start running instructions
+    chip8.run_instruction();
+}
