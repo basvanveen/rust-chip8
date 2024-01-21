@@ -10,5 +10,7 @@ fn main() {
     chip8.load_rom("src/rom/ibmlogo.ch8");
     chip8.print_memory();
     // Start running instructions
-    chip8.run_instruction();
+    loop{
+      chip8.run_instruction();
+    }
 }
