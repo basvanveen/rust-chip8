@@ -1,5 +1,5 @@
 use crate::memory::Memory;
-
+use crate::display::Display;
 
 const PC_INCREMENT:u16 = 2; 
 pub struct Cpu {
@@ -28,7 +28,7 @@ impl Cpu {
 
     pub fn empty(){}
 
-    pub fn run_instruction(&mut self, memory: &mut Memory) {
+    pub fn run_instruction(&mut self, memory: &mut Memory, display: &mut Display) {
         // Keep in mind RAM is sized in u8 chunks but PC will read u16 chunks so we end up with (2 bytes == 1 WORD)
         // Little Endian so High Byte
         // HIGH Byte ==  ending (left part of u16)
@@ -87,7 +87,7 @@ impl Cpu {
            0xA => self.opcode_Annn(nnn, instruction),
            0xB => println!("{:#X} JP V0, addr", instruction),
            0xC => println!("{:#X} RND Vx, byte", instruction),
-           0xD => self.opcode_Dxyn(x, y, n, instruction),
+           0xD => self.opcode_Dxyn(x, y, n, memory ,display, instruction),
            0xE => { match nn {
             0x9E => println!("{:#X} SKP Vx", instruction), //9E
             0xA1 => println!("{:#X} SKNP Vx", instruction), //A1
@@ -140,14 +140,21 @@ impl Cpu {
         self.set_pc(increment);
     }
 
-    pub fn opcode_Dxyn(&mut self, x: u8, y: u8, n: u8, _instruction: u16){
+    pub fn opcode_Dxyn(&mut self, x: u8, y: u8, n: u8, memory: &mut Memory, display: &mut Display, _instruction: u16){
         // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
         // V[x], V[y] contain coordinates for the display start print, n is number of bytes to read from I
         println!("{:#X} DRW Vx,Vy, nibble", _instruction);
         let vx:u8 = self.vx[x as usize];
         let vy:u8 = self.vx[y as usize];
-        
+         
+        let mut offset:u16  = self.i;
+        for sprite in 0..n{
+        //display.set_display(vx, vy, n);
+        println!("VALUE{:#X}", memory.read_byte(offset));
+        offset = offset + 1;
+        }
         println!("X coord {:?} Y coord: {:?}", vx, vy);
+        
         let increment = self.get_pc() + PC_INCREMENT;
         self.set_pc(increment);
     }
@@ -175,4 +182,5 @@ impl Cpu {
     pub fn get_pc(&mut self) -> u16{
         self.pc
     }
+    
 }

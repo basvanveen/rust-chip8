@@ -3,6 +3,7 @@ use crate::chip8::Chip8;
 mod memory;
 mod chip8;
 mod cpu;
+mod display;
 
 fn main() {
     

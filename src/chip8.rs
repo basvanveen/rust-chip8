@@ -1,11 +1,13 @@
 use crate::memory::Memory;
 use crate::cpu::Cpu;
+use crate::display::Display;
 use std::fs::File;
 use std::io::Read;
 
 pub struct Chip8 {
     memory: Memory,
-    cpu: Cpu
+    cpu: Cpu,
+    display: Display,
 }
 
 impl Chip8 {
@@ -13,6 +15,7 @@ impl Chip8 {
         Chip8 {
           memory: Memory::new(),
           cpu: Cpu::new(),
+          display: Display::new()
         }
     }
 
@@ -34,7 +37,8 @@ impl Chip8 {
         }
     }
 
-    pub fn run_instruction(&mut self){
-        self.cpu.run_instruction(&mut self.memory);
+    pub fn run_instruction(&mut self, ){
+        self.cpu.run_instruction(&mut self.memory, &mut self.display);
     }
+
 }
