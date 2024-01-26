@@ -1,13 +1,16 @@
 use crate::memory::Memory;
 use crate::cpu::Cpu;
-use crate::display::Display;
+
 use std::fs::File;
 use std::io::Read;
 
 pub struct Chip8 {
     memory: Memory,
     cpu: Cpu,
-    display: Display,
+}
+
+pub struct Bus<'a> {
+    pub vram: &'a [[u8;64];32],
 }
 
 impl Chip8 {
@@ -15,15 +18,13 @@ impl Chip8 {
         Chip8 {
           memory: Memory::new(),
           cpu: Cpu::new(),
-          display: Display::new()
         }
     }
 
     pub fn load_rom(&mut self, path: &str){
         let mut rom = File::open(path).unwrap();
         let mut data: Vec<u8> = Vec::new();
-        rom.read_to_end(&mut data);
-        //print!("{:02X?}", data);
+        rom.read_to_end(&mut data); // data manipulated so not `Unused`
         let offset = 0x200; //end of VM space
         for i in 0..data.len(){
             self.memory.write_byte((offset + i) as u16,data[i])
@@ -37,8 +38,10 @@ impl Chip8 {
         }
     }
 
-    pub fn run_instruction(&mut self, ){
-        self.cpu.run_instruction(&mut self.memory, &mut self.display);
+    pub fn run_instruction(&mut self, ) -> Bus {
+        Bus {
+        vram: self.cpu.run_instruction(&mut self.memory).vram
+        }
     }
 
 }

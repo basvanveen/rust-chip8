@@ -6,7 +6,7 @@ impl Memory {
 
     pub fn new() -> Memory {
         Memory{
-            mem: [0; 4096]
+            mem: [0; 4096],
         }   
     }
     
@@ -41,7 +41,6 @@ impl Memory {
 
         let mut i = 0; // count for each element inside sprite of sprites for memory
         for sprite in sprites.iter() {
-           println!("{:?}", sprite);
            for &element in sprite {
                 self.write_byte(i, element);
                 i += 1;
