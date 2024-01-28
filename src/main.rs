@@ -42,7 +42,7 @@ fn main() {
 
   // CHIP 8 stuff
   let mut chip8 = Chip8::new();
-  chip8.load_rom("src/rom/ibmlogo.ch8");
+  chip8.load_rom("src/rom/TESTROM");
   'running: loop {
       for event in event_pump.poll_iter() {
           match event {
@@ -79,7 +79,7 @@ fn main() {
     }
       canvas.present();
       // limit FPS if needed
-      ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+      ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 330));
   }
 
 }

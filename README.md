@@ -25,3 +25,7 @@ https://www.arjunnair.in/p37/
 
 https://github.com/starrhorne/chip8-rust/
 
+## Instruction Testing
+
+https://github.com/Timendus/chip8-test-suite
+
