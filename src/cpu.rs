@@ -91,8 +91,8 @@ impl Cpu {
             0x4 => self.opcode_8xy4(x, y, instruction), //0
             0x5 => self.opcode_8xy5(x, y, instruction), //0
             0x6 => self.opcode_8xy6(x, y, instruction), //0
-            0x7 => println!("{:#X} SUBN VxVy", instruction), //0
-            0xE => println!("{:#X} SHL VxVy", instruction), //0
+            0x7 => self.opcode_8xy7(x, y, instruction), //0
+            0xE => self.opcode_8xye(x, y, instruction), //0
             _ => println!("{:#X} UNKNOWN", instruction),
            } } //end 0x8
            0x9 => { match n {
@@ -215,7 +215,7 @@ impl Cpu {
     pub fn opcode_5xy0(&mut self, x: usize, y: usize, _instruction: u16){
         // SE Vx,Vy
         println!("{:#X} SE Vx, Vy", _instruction);
-        self.vx[x] = self.vx[y];
+        // self.vx[x] = self.vx[y];
 
         if self.vx[x] == self.vx[y] {
             self.pc += 2;
@@ -316,6 +316,27 @@ impl Cpu {
         self.set_pc(increment);
     }
 
+    pub fn opcode_8xy7(&mut self, x: usize, y: usize, _instruction: u16){
+        // Set Vx = Vy - Vx
+        println!("{:#X} SUBN Vx,Vy", _instruction);
+        self.vx[0x0F] = if self.vx[y] > self.vx[x] { 1 } else { 0 };
+
+        let result:i16 = self.vx[y] as i16 - self.vx[x] as i16;
+        self.vx[x] = result as u8;
+        let increment = self.get_pc() + PC_INCREMENT;
+        self.set_pc(increment);
+    }
+
+    pub fn opcode_8xye(&mut self, x: usize, y: usize, _instruction: u16){
+        // Set Vx = Vx SHL 1
+        println!("{:#X} SHL Vx, Vy", _instruction);
+        self.vx[0x0F] = if (self.vx[x] & 0b1000_0000) == 1 { 1 } else { 0 };
+        self.vx[x] = self.vx[x] << 1; // Shift Left
+
+        let increment = self.get_pc() + PC_INCREMENT;
+        self.set_pc(increment);
+    }
+
     pub fn opcode_Dxyn(&mut self, x: usize, y: usize, n: u8, memory: &mut Memory, _instruction: u16){
         // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
         // V[x], V[y] contain coordinates for the display start print, n is number of bytes to read from I
@@ -389,8 +410,9 @@ impl Cpu {
 
     pub fn opcode_fx65(&mut self,x: usize, memory: &mut Memory, _instruction: u16){
         println!("{:#X} LD Vx, [I]", _instruction);
-        for number in 0..x{
-          memory.write_byte(self.i+x as u16, self.get_vx(x));
+        for number in 0..(x+1){
+          self.vx[number] = memory.read_byte(self.i+number as u16);
+          //memory.write_byte(self.i+x as u16, self.get_vx(number));
         }
         self.i = self.i + x as u16 + 1;
         let increment = self.get_pc() + PC_INCREMENT;
