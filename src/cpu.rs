@@ -116,7 +116,7 @@ impl Cpu {
             0x1E => self.opcode_fx1e(x, memory, instruction), //1E
             0x29 => self.opcode_fx29(x, memory, instruction), //29
             0x33 => self.opcode_fx33(x, memory, instruction), //33
-            0x55 => println!("{:#X} LD[I], Vx", instruction), //55
+            0x55 => self.opcode_fx55(x, memory, instruction), //55
             0x65 => self.opcode_fx65(x, memory, instruction), //65
             _ => println!("{:#X} UNKNOWN", instruction),
            } } //end 0xE
@@ -398,12 +398,27 @@ impl Cpu {
         self.set_pc(increment);
     }
 
+    pub fn opcode_fx55(&mut self, x: usize, memory: &mut Memory, _instruction: u16){
+        // Stores V0 to VX in memory starting at address I
+        println!("{:#X} LD [I], Vx", _instruction);
+        for number in 0..(x+1){
+            memory.write_byte(self.i+number as u16, self.vx[number])
+          }
+        self.i = self.i + x as u16 + 1;
+        let increment = self.get_pc() + PC_INCREMENT;
+        self.set_pc(increment);
+    }
+
     pub fn opcode_fx33(&mut self, x: usize, memory: &mut Memory, _instruction: u16){
         println!("{:#X} LD B, Vx", _instruction);
-        let vx = self.get_vx(x);
-        memory.write_byte(self.i, (vx/100));
-        memory.write_byte(self.i + 1, (vx%100)/100);
-        memory.write_byte(self.i + 2, (vx%10));
+
+        println!("X: {:?}", (self.vx[x]));
+        memory.write_byte(self.i, (self.vx[x]/100));
+        println!("I1: {:?}", (self.vx[x]/100));
+        memory.write_byte(self.i + 1, (self.vx[x]%100)/10);
+        println!("I2: {:?}", (self.vx[x]%100)/10);
+        memory.write_byte(self.i + 2, (self.vx[x]%10));
+        println!("I3: {:?}", (self.vx[x]%10));
         let increment = self.get_pc() + PC_INCREMENT;
         self.set_pc(increment);
     }
