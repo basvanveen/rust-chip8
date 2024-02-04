@@ -39,10 +39,10 @@ impl Cpu {
 
     pub fn empty(){}
 
-    pub fn run_instruction(&mut self, memory: &mut Memory) -> Bus {
+    pub fn run_instruction(&mut self, memory: &mut Memory, pressed: usize) -> Bus {
         let second = time::Duration::from_millis(1000);
         //let now = time::Instant::now();
-
+        println!("BUTTON {:?}", pressed);
         // Keep in mind RAM is sized in u8 chunks but PC will read u16 chunks so we end up with (2 bytes == 1 WORD)
         // Little Endian so High Byte
         // HIGH Byte ==  ending (left part of u16)
@@ -110,7 +110,7 @@ impl Cpu {
            } } //end 0xE
            0xF => { match nn {
             0x07 => self.opcode_fx07(x, memory, instruction), //9E
-            0x0A => println!("{:#X} LD Vx, K", instruction), //0A
+            0x0A => self.opcode_fx0a(x, pressed,instruction), //0A
             0x15 => self.opcode_fx15(x, memory, instruction), //15
             0x18 => self.opcode_fx18(x, memory, instruction), //18
             0x1E => self.opcode_fx1e(x, memory, instruction), //1E
@@ -380,6 +380,13 @@ impl Cpu {
         println!("{:#X} LD Vx, DT", _instruction);
         self.write_vx(x,self.dt);
 
+        let increment = self.get_pc() + PC_INCREMENT;
+        self.set_pc(increment);
+    }
+    
+    pub fn opcode_fx0a(&mut self, x: usize, pressed: usize, _instruction: u16){
+        println!("{:#X} LD Vx, K woop", _instruction);
+        self.vx[x] = pressed as u8;
         let increment = self.get_pc() + PC_INCREMENT;
         self.set_pc(increment);
     }
