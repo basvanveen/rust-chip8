@@ -38,7 +38,7 @@ impl Chip8 {
         }
     }
 
-    pub fn run_instruction(&mut self, pressed: usize ) -> Bus {
+    pub fn run_instruction(&mut self, pressed: [bool; 16] ) -> Bus {
         Bus {
         vram: self.cpu.run_instruction(&mut self.memory, pressed).vram
         }

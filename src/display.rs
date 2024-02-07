@@ -26,7 +26,7 @@ impl Display{
         let mut canvas = window.into_canvas().build().unwrap();
       
         canvas.set_draw_color(Color::RGB(255, 255, 255));
-        canvas.clear();
+        //canvas.clear();
         canvas.present();
         Display {canvas: canvas }
     }

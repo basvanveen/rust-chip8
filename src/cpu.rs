@@ -37,12 +37,10 @@ impl Cpu {
         }
     }
 
-    pub fn empty(){}
-
-    pub fn run_instruction(&mut self, memory: &mut Memory, pressed: usize) -> Bus {
+    pub fn run_instruction(&mut self, memory: &mut Memory, pressed: [bool; 16]) -> Bus {
         let second = time::Duration::from_millis(1000);
         //let now = time::Instant::now();
-        println!("BUTTON {:?}", pressed);
+        //println!("BUTTON {:?}", pressed);
         // Keep in mind RAM is sized in u8 chunks but PC will read u16 chunks so we end up with (2 bytes == 1 WORD)
         // Little Endian so High Byte
         // HIGH Byte ==  ending (left part of u16)
@@ -53,6 +51,7 @@ impl Cpu {
         // We shift since we only use the first part of u16 in low_byte
         let instruction: u16 = (high_byte << 8) | low_byte;
 
+        let hi    = (instruction & 0xFF00) as u8;
         let n     = (instruction & 0x000F) as u8;
         let nn    = (instruction & 0x00FF) as u8;
         let nnn   = instruction & 0x0FFF;
@@ -65,8 +64,9 @@ impl Cpu {
             }
             //thread::sleep(second);
         }
+
         // debugging
-        println!("n {:#X},nn {:#X},nnn {:#X},x {:#X},y {:#X},instruction {:#X}, PC {:#X}",n, nn, nnn, x, y, instruction, self.pc);
+        //println!("n {:#X},nn {:#X},nnn {:#X},x {:#X},y {:#X},instruction {:#X}, PC {:#X}",n, nn, nnn, x, y, instruction, self.pc);
         match instruction >> 12 {
            0x0 => { match nn {
             0xE0 => self.opcode_00e0(instruction), //0
@@ -104,8 +104,8 @@ impl Cpu {
            0xC => self.opcode_Cxkk(x, nn, instruction),
            0xD => self.opcode_Dxyn(x, y, n, memory, instruction),
            0xE => { match nn {
-            0x9E => println!("{:#X} SKP Vx", instruction), //9E
-            0xA1 => self.opcode_ExA1(x, instruction), //A1
+            0x9E => self.opcode_Ex9e(x, pressed, instruction), //9E
+            0xA1 => self.opcode_ExA1(x, pressed, instruction), //A1
             _ => println!("{:#X} UNKNOWN", instruction),
            } } //end 0xE
            0xF => { match nn {
@@ -181,13 +181,31 @@ impl Cpu {
         self.set_pc(increment);
     }
 
-    pub fn opcode_ExA1(&mut self, x: usize, _instruction: u16){
+    pub fn opcode_Ex9e(&mut self, x: usize,pressed: [bool; 16] , _instruction: u16){
+        // Skip instruction if key with value of Vx is pressed.
+        // KEYBOARD Implementation *WIP*
+        let vx:usize = self.vx[x] as usize;
+        println!("{:#X} SKP Vx", _instruction);
+        if (pressed[vx]) {
+            //println!("PRESSED SKP {:?}", pressed);
+            self.pc += 4;
+        }else{
+            self.pc += 2;
+        }
+    }
+
+    pub fn opcode_ExA1(&mut self, x: usize,pressed: [bool; 16] , _instruction: u16){
         // Skip instruction if key with value of Vx is not pressed.
         // KEYBOARD Implementation *WIP*
-        println!("{:#X} SKNP Vx", _instruction);
+        let vx:usize = self.vx[x] as usize;
+        println!("{:#X} SKPN Vx", _instruction);
+        if (!pressed[vx]) {
+            println!("NOTPRESSE SKPN{:?}", vx);
+            self.pc += 4;
+        }else{
+            self.pc += 2;
 
-        let increment = self.get_pc() + PC_INCREMENT + 2;
-        self.set_pc(increment);
+        }
     }
 
     pub fn opcode_3xkk(&mut self, x: usize, kk: u8, _instruction: u16){
@@ -384,9 +402,9 @@ impl Cpu {
         self.set_pc(increment);
     }
     
-    pub fn opcode_fx0a(&mut self, x: usize, pressed: usize, _instruction: u16){
+    pub fn opcode_fx0a(&mut self, x: usize, pressed: [bool; 16], _instruction: u16){
         println!("{:#X} LD Vx, K woop", _instruction);
-        self.vx[x] = pressed as u8;
+        //self.vx[x] = pressed as u8;
         let increment = self.get_pc() + PC_INCREMENT;
         self.set_pc(increment);
     }

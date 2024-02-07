@@ -24,15 +24,20 @@ fn main() {
   let mut chip8 = Chip8::new();
   chip8.load_rom("src/rom/PONG");
   loop {
+        let start = std::time::Instant::now();
         // Poll Keyboard
-        let pressed = input.poll().unwrap();
+        let pressed:[bool; 16] = input.poll().unwrap();
         // Run Instructions on Chip8 VM
         let output = chip8.run_instruction(pressed);
         // Draw Display
         display.draw(output.vram);
         // Poll Keyboard
         // limit FPS if needed
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 320));
+        //::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 360));
+        // 60Hz
+        ::std::thread::sleep((Duration::from_millis(1000)-start.elapsed())/6000);
+        //eprintln!("{:?}", start.elapsed());
+        //panic!();
   }
 
 }
