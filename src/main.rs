@@ -22,7 +22,7 @@ fn main() {
 
   // CHIP 8 stuff
   let mut chip8 = Chip8::new();
-  chip8.load_rom("src/rom/PONG");
+  chip8.load_rom("src/rom/INVADERS");
   loop {
         let start = std::time::Instant::now();
         // Poll Keyboard
@@ -31,13 +31,8 @@ fn main() {
         let output = chip8.run_instruction(pressed);
         // Draw Display
         display.draw(output.vram);
-        // Poll Keyboard
-        // limit FPS if needed
-        //::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 360));
-        // 60Hz
-        ::std::thread::sleep((Duration::from_millis(1000)-start.elapsed())/6000);
-        //eprintln!("{:?}", start.elapsed());
-        //panic!();
+        // 60Hz still need to implement DT
+        ::std::thread::sleep((Duration::from_millis(1000)-start.elapsed())/600);
   }
 
 }

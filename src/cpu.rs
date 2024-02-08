@@ -102,7 +102,7 @@ impl Cpu {
            0xA => self.opcode_Annn(nnn, instruction),
            0xB => println!("{:#X} JP V0, addr", instruction),
            0xC => self.opcode_Cxkk(x, nn, instruction),
-           0xD => self.opcode_Dxyn(x, y, n, memory, instruction),
+           0xD => self.opcode_dxyn(x, y, n, memory, instruction),
            0xE => { match nn {
             0x9E => self.opcode_Ex9e(x, pressed, instruction), //9E
             0xA1 => self.opcode_ExA1(x, pressed, instruction), //A1
@@ -355,7 +355,7 @@ impl Cpu {
         self.set_pc(increment);
     }
 
-    pub fn opcode_Dxyn(&mut self, x: usize, y: usize, n: u8, memory: &mut Memory, _instruction: u16){
+    pub fn opcode_dxyn(&mut self, x: usize, y: usize, n: u8, memory: &mut Memory, _instruction: u16){
         // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
         // V[x], V[y] contain coordinates for the display start print, n is number of bytes to read from I
         println!("{:#X} DRW Vx,Vy, nibble", _instruction);
@@ -364,19 +364,19 @@ impl Cpu {
 
         let mut offset:u16  = self.i;
 
-        println!("X coord {:?} Y coord: {:?}", vx, vy);
+        println!("X coord {:?} Y coord: {:?} height: {:?}", vx, vy, n);
 
         for sprite in 0..n{
         let value:u8 = memory.read_byte(offset + (sprite as u16));
-        let row = vy + sprite; 
+        let row = (vy + sprite) % 32; // wrap don't allow highjer 
         for bit in (0..8){
           let shiftright = (value >> (7 - bit));
           let pixel      = shiftright & 0b_0000_0001; // AND to only get LSB as pixel
-          // temp out of bound fix / not wrapping around
-          if (vx+bit) < 64 {
           // Fill Position in Row Y in place VX+BIT, and XOR currentpixel ^ pixel
-          self.vram[row as usize][(vx+bit) as usize] ^= pixel; 
-          }
+          if(self.vram[row as usize][((vx+bit)%64) as usize] != pixel){
+            self.vx[0xf]= 1;
+          }else{self.vx[0xf]=0}
+          self.vram[row as usize][((vx+bit)%64) as usize] ^= pixel; 
         }
         }
 

@@ -3,7 +3,6 @@ use sdl2::render::Canvas;
 use sdl2::pixels::Color;
 use sdl2::pixels;
 use sdl2::rect::Rect;
-use std::time::Duration;
 
 const SCREEN_WIDTH: u32 = 640;
 const SCREEN_HEIGHT: u32 = 320;
@@ -24,14 +23,13 @@ impl Display{
             .unwrap();
       
         let mut canvas = window.into_canvas().build().unwrap();
-      
+        
         canvas.set_draw_color(Color::RGB(255, 255, 255));
-        //canvas.clear();
-        canvas.present();
         Display {canvas: canvas }
     }
 
     pub fn draw(&mut self, vram: &[[u8;64];32]){
+        self.canvas.clear();
         let mut i = 125;
         i = (i + 1) % 255;
         self.canvas.set_draw_color(Color::RGB(i, 64, 255 - i));
