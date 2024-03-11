@@ -32,7 +32,8 @@ fn main() {
         // Draw Display
         display.draw(output.vram);
         // 60Hz still need to implement DT
-        ::std::thread::sleep((Duration::from_millis(1000)-start.elapsed())/600);
+        println!("elapsed {:?}", start.elapsed());
+        ::std::thread::sleep(Duration::from_millis(2));
   }
 
 }

@@ -37,8 +37,11 @@ impl Cpu {
         }
     }
 
+    pub fn delay_timer(&mut self){
+        if self.dt > 0 {self.dt -= 1}
+    }
+
     pub fn run_instruction(&mut self, memory: &mut Memory, pressed: [bool; 16]) -> Bus {
-        let second = time::Duration::from_millis(1000);
         //let now = time::Instant::now();
         //println!("BUTTON {:?}", pressed);
         // Keep in mind RAM is sized in u8 chunks but PC will read u16 chunks so we end up with (2 bytes == 1 WORD)
@@ -51,7 +54,6 @@ impl Cpu {
         // We shift since we only use the first part of u16 in low_byte
         let instruction: u16 = (high_byte << 8) | low_byte;
 
-        let hi    = (instruction & 0xFF00) as u8;
         let n     = (instruction & 0x000F) as u8;
         let nn    = (instruction & 0x00FF) as u8;
         let nnn   = instruction & 0x0FFF;
@@ -62,8 +64,9 @@ impl Cpu {
             for index in 0..self.vram.len(){
                 println!("{:#2} {:?}", index+1, self.vram[index])
             }
-            //thread::sleep(second);
         }
+
+        self.delay_timer();
 
         // debugging
         //println!("n {:#X},nn {:#X},nnn {:#X},x {:#X},y {:#X},instruction {:#X}, PC {:#X}",n, nn, nnn, x, y, instruction, self.pc);
@@ -104,8 +107,8 @@ impl Cpu {
            0xC => self.opcode_Cxkk(x, nn, instruction),
            0xD => self.opcode_dxyn(x, y, n, memory, instruction),
            0xE => { match nn {
-            0x9E => self.opcode_Ex9e(x, pressed, instruction), //9E
-            0xA1 => self.opcode_ExA1(x, pressed, instruction), //A1
+            0x9E => self.opcode_ex9e(x, pressed, instruction), //9E
+            0xA1 => self.opcode_exa1(x, pressed, instruction), //A1
             _ => println!("{:#X} UNKNOWN", instruction),
            } } //end 0xE
            0xF => { match nn {
@@ -120,7 +123,7 @@ impl Cpu {
             0x65 => self.opcode_fx65(x, memory, instruction), //65
             _ => println!("{:#X} UNKNOWN", instruction),
            } } //end 0xE
-           _ => {},//println!("Catch-all {:?}", instruction),
+           _ => {},
         }
         self.instruction_counter += 1;
         Bus {
@@ -131,7 +134,7 @@ impl Cpu {
     pub fn opcode_00e0(&mut self, _instruction: u16) {
         // Clear the display
         println!("{:#X} Clear Screen", _instruction);
-        // IMPLEMENT CLEARSCREEN
+        self.vram = [[0;64];32];
         let increment = self.get_pc() + PC_INCREMENT;
         self.set_pc(increment);
     }
@@ -139,10 +142,9 @@ impl Cpu {
     pub fn opcode_00ee(&mut self, _instruction: u16) {
         // Return from a subroutine
         println!("{:#X} RET", _instruction);
-        // IMPLEMENT CLEARSCREEN
         let addr = self.stack.pop().unwrap();
         self.set_pc(addr);
-        println!("addr {:#X} popped from stack,PC:{:?} instruction: {:#X}", addr , self.pc, _instruction);
+        println!("RETURN addr {:#X} popped from stack,PC:{:?} instruction: {:#X}", addr , self.pc, _instruction);
         //panic!();
     }
 
@@ -181,7 +183,7 @@ impl Cpu {
         self.set_pc(increment);
     }
 
-    pub fn opcode_Ex9e(&mut self, x: usize,pressed: [bool; 16] , _instruction: u16){
+    pub fn opcode_ex9e(&mut self, x: usize,pressed: [bool; 16] , _instruction: u16){
         // Skip instruction if key with value of Vx is pressed.
         // KEYBOARD Implementation *WIP*
         let vx:usize = self.vx[x] as usize;
@@ -194,13 +196,13 @@ impl Cpu {
         }
     }
 
-    pub fn opcode_ExA1(&mut self, x: usize,pressed: [bool; 16] , _instruction: u16){
+    pub fn opcode_exa1(&mut self, x: usize,pressed: [bool; 16] , _instruction: u16){
         // Skip instruction if key with value of Vx is not pressed.
         // KEYBOARD Implementation *WIP*
         let vx:usize = self.vx[x] as usize;
         println!("{:#X} SKPN Vx", _instruction);
         if (!pressed[vx]) {
-            println!("NOTPRESSE SKPN{:?}", vx);
+            println!("Ins NOTPRESSE SKPN{:?}", vx);
             self.pc += 4;
         }else{
             self.pc += 2;

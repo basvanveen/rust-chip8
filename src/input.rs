@@ -3,6 +3,10 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::collections::HashSet;
 
+use std::time::Duration;
+use std::thread::sleep;
+
+
 pub struct Input {
   event_pump: EventPump
 }
@@ -22,7 +26,10 @@ impl Input{
               // Close Window
               Event::Quit {..} => {
                   panic!();
-              }
+              },
+              Event::MouseButtonDown {..} => {
+                //sleep(Duration::from_millis(1000));
+              },
                // Else continue
                _ => { }
               }
