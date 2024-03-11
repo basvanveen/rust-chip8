@@ -1,6 +1,7 @@
 # rust-chip8
-Trying to learn Rust by creating a Chip-8 Emulator, heavily leaning on @alexene's stream (to get started) making a chip-8 emulator (super usefull!)
 
+This is my first effort on trying to learn/get familiar with Rust. Code-wise it probably isn't the most elegant/clean code since I don't have a lot experience with it 🙈 (yet)
+I always wanted to learn how to develop an emulator, the chip8 turned out to be a good way to start this journey since it has relatively few opcodes and simple sound and graphics. I've used a lot of articles and to get bootstrapped I used @alexene's stream that gives a good introduction (thx!), I tried adding most of the resources I used as links you can find down below.
 
 ![rust-chip8](/images/sdl-window.gif "Chip8 Screenshot")
 
