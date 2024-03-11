@@ -22,7 +22,7 @@ fn main() {
 
   // CHIP 8 stuff
   let mut chip8 = Chip8::new();
-  chip8.load_rom("src/rom/INVADERS");
+  chip8.load_rom("src/rom/ibmlogo.ch8");
   loop {
         let start = std::time::Instant::now();
         // Poll Keyboard
